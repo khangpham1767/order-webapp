@@ -12,7 +12,7 @@ export function getSocket(): TypedSocket {
   if (!socket) {
     socket = io(SOCKET_URL, {
       autoConnect: false,
-      transports: ['websocket', 'polling'],
+      transports: ['websocket'],
     }) as TypedSocket;
   }
   return socket;
