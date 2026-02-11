@@ -1,7 +1,13 @@
 {
   "permissions": {
     "allow": [
-      "WebSearch"
+      "WebSearch",
+      "Bash(wc:*)",
+      "Bash(while read f)",
+      "Bash(done)",
+      "Bash(ls:*)",
+      "Bash(npx tsc:*)",
+      "Bash(yarn add:*)"
     ]
   }
 }

@@ -1,0 +1,104 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum OrderStatus {
+  DRAFT
+  QUEUED
+  COOKING
+  DONE
+  PAID
+}
+
+enum MenuItemType {
+  MAIN
+  ADDON
+}
+
+enum OptionType {
+  NOODLE_TYPE
+  SPECIAL
+  VEGETABLE
+  SIZE
+}
+
+model Table {
+  id     Int     @id @default(autoincrement())
+  number Int     @unique
+  label  String
+  orders Order[]
+
+  @@map("tables")
+}
+
+model MenuItem {
+  id        Int          @id @default(autoincrement())
+  name      String
+  sellPrice Int
+  costPrice Int
+  type      MenuItemType
+  active    Boolean      @default(true)
+  options   MenuItemOption[]
+  orderItems OrderItem[]
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+
+  @@map("menu_items")
+}
+
+model MenuItemOption {
+  id         Int        @id @default(autoincrement())
+  menuItemId Int
+  menuItem   MenuItem   @relation(fields: [menuItemId], references: [id], onDelete: Cascade)
+  optionType OptionType
+  label      String
+  isDefault  Boolean    @default(false)
+  surcharge  Int        @default(0)
+  sortOrder  Int        @default(0)
+
+  @@map("menu_item_options")
+}
+
+model Order {
+  id            Int         @id @default(autoincrement())
+  tableId       Int
+  table         Table       @relation(fields: [tableId], references: [id])
+  status        OrderStatus @default(DRAFT)
+  queuePosition Int?
+  items         OrderItem[]
+  payment       Payment?
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+
+  @@map("orders")
+}
+
+model OrderItem {
+  id           Int      @id @default(autoincrement())
+  orderId      Int
+  order        Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  menuItemId   Int
+  menuItem     MenuItem @relation(fields: [menuItemId], references: [id])
+  quantity     Int      @default(1)
+  unitPrice    Int
+  configDetail Json
+  notes        String?
+  createdAt    DateTime @default(now())
+
+  @@map("order_items")
+}
+
+model Payment {
+  id          Int      @id @default(autoincrement())
+  orderId     Int      @unique
+  order       Order    @relation(fields: [orderId], references: [id])
+  totalAmount Int
+  paidAt      DateTime @default(now())
+
+  @@map("payments")
+}
