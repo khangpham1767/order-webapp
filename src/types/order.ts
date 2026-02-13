@@ -5,6 +5,7 @@ export interface AddonConfig {
   name: string;
   quantity: number;
   price: number;
+  variant?: string;
 }
 
 export interface OrderItemConfig {
@@ -16,6 +17,7 @@ export interface OrderItemConfig {
   size: string;
   addons: AddonConfig[];
   quantity: number;
+  variant?: string;
 }
 
 export interface GroupedOrderItem {

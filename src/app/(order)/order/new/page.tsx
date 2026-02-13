@@ -6,10 +6,10 @@ import { useMenu } from '@/hooks/use-menu';
 import { useOrderDraft } from '@/hooks/use-order-draft';
 import { MenuItemPicker } from '@/components/order/menu-item-picker';
 import { OptionFlow } from '@/components/order/option-flow';
+import { VariantPicker } from '@/components/order/variant-picker';
 import { OrderItemCard } from '@/components/order/order-item-card';
 import { Button } from '@/components/ui/button';
 import { LoadingScreen } from '@/components/ui/spinner';
-import { formatVND } from '@/lib/utils';
 import type { MenuItemWithOptions } from '@/types/menu';
 import type { OrderItemConfig } from '@/types/order';
 
@@ -22,6 +22,7 @@ function NewOrderContent() {
   const { mainItems, addonItems, loading: menuLoading } = useMenu();
   const { items, totalQuantity, addItem, removeItem, clear } = useOrderDraft();
   const [selectedMain, setSelectedMain] = useState<MenuItemWithOptions | null>(null);
+  const [selectedAddonForVariant, setSelectedAddonForVariant] = useState<MenuItemWithOptions | null>(null);
 
   if (menuLoading) return <LoadingScreen />;
 
@@ -30,6 +31,11 @@ function NewOrderContent() {
   };
 
   const handleAddonSelect = (item: MenuItemWithOptions) => {
+    const hasVariants = item.options.some((o) => o.optionType === 'VARIANT');
+    if (hasVariants) {
+      setSelectedAddonForVariant(item);
+      return;
+    }
     const config: OrderItemConfig = {
       menuItemId: item.id,
       menuItemName: item.name,
@@ -41,6 +47,27 @@ function NewOrderContent() {
       quantity: 1,
     };
     addItem(config, 1);
+  };
+
+  const handleVariantSelect = (variant: string) => {
+    if (!selectedAddonForVariant) return;
+    const variantOption = selectedAddonForVariant.options.find(
+      (o) => o.optionType === 'VARIANT' && o.label === variant,
+    );
+    const config: OrderItemConfig = {
+      menuItemId: selectedAddonForVariant.id,
+      menuItemName: selectedAddonForVariant.name,
+      noodleType: '',
+      specials: [],
+      vegetables: [],
+      size: '',
+      addons: [],
+      quantity: 1,
+      variant,
+    };
+    const unitPrice = selectedAddonForVariant.sellPrice + (variantOption?.surcharge || 0);
+    addItem(config, 1);
+    setSelectedAddonForVariant(null);
   };
 
   const handleOptionComplete = (config: OrderItemConfig, quantity: number) => {
@@ -58,13 +85,17 @@ function NewOrderContent() {
       const sizeOption = menuItem?.options.find(
         (o) => o.optionType === 'SIZE' && o.label === item.config.size,
       );
+      const variantOption = item.config.variant
+        ? menuItem?.options.find((o) => o.optionType === 'VARIANT' && o.label === item.config.variant)
+        : undefined;
       const sizeSurcharge = sizeOption?.surcharge || 0;
+      const variantSurcharge = variantOption?.surcharge || 0;
       const basePrice = menuItem?.sellPrice || 0;
 
       return {
         menuItemId: item.config.menuItemId,
         quantity: item.quantity,
-        unitPrice: basePrice + sizeSurcharge,
+        unitPrice: basePrice + sizeSurcharge + variantSurcharge,
         configDetail: item.config,
         notes: item.notes,
       };
@@ -86,15 +117,24 @@ function NewOrderContent() {
     return (
       <OptionFlow
         menuItem={selectedMain}
-        addonItems={addonItems}
         onComplete={handleOptionComplete}
         onCancel={() => setSelectedMain(null)}
       />
     );
   }
 
+  if (selectedAddonForVariant) {
+    return (
+      <VariantPicker
+        menuItem={selectedAddonForVariant}
+        onSelect={handleVariantSelect}
+        onCancel={() => setSelectedAddonForVariant(null)}
+      />
+    );
+  }
+
   return (
-    <div className="space-y-4 pb-24">
+    <div className="space-y-4 pb-4">
       <h2 className="text-xl font-bold text-gray-900">
         Order mới {tableId && `– Bàn ${tableId}`}
       </h2>
@@ -110,7 +150,7 @@ function NewOrderContent() {
       {items.length > 0 && (
         <div className="space-y-2 mt-6">
           <div className="flex items-center justify-between">
-            <h3 className="font-semibold text-gray-800">Đã chọn</h3>
+            <h3 className="font-semibold text-gray-800">Đã chọn ({totalQuantity})</h3>
             <button onClick={clear} className="text-sm text-red-500 hover:text-red-700">
               Xoá tất cả
             </button>
@@ -122,7 +162,10 @@ function NewOrderContent() {
             const sizeOption = menuItem?.options.find(
               (o) => o.optionType === 'SIZE' && o.label === item.config.size,
             );
-            const unitPrice = (menuItem?.sellPrice || 0) + (sizeOption?.surcharge || 0);
+            const variantOption = item.config.variant
+              ? menuItem?.options.find((o) => o.optionType === 'VARIANT' && o.label === item.config.variant)
+              : undefined;
+            const unitPrice = (menuItem?.sellPrice || 0) + (sizeOption?.surcharge || 0) + (variantOption?.surcharge || 0);
 
             return (
               <OrderItemCard
@@ -135,20 +178,9 @@ function NewOrderContent() {
               />
             );
           })}
-        </div>
-      )}
-
-      {/* Floating bar */}
-      {items.length > 0 && (
-        <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-4 shadow-lg">
-          <div className="max-w-4xl mx-auto flex items-center justify-between">
-            <div>
-              <span className="text-sm text-gray-500">{totalQuantity} món</span>
-            </div>
-            <Button onClick={handleSubmit}>
-              Xem đơn
-            </Button>
-          </div>
+          <Button className="w-full mt-3" onClick={handleSubmit}>
+            Xác nhận đơn
+          </Button>
         </div>
       )}
     </div>

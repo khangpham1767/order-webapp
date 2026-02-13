@@ -26,7 +26,7 @@ export default function OrderDetailPage({
   const canEdit = order.status === 'DRAFT' || order.status === 'QUEUED';
   const canCancel = order.status === 'DRAFT' || order.status === 'QUEUED';
   const canPay = order.status === 'DONE';
-  const canAddMore = order.status === 'COOKING';
+  const canAddMore = order.status === 'COOKING' || order.status === 'DONE';
 
   const handleCancel = async () => {
     if (!confirm('Bạn chắc chắn muốn huỷ order?')) return;
@@ -86,12 +86,12 @@ export default function OrderDetailPage({
         )}
         {canAddMore && (
           <Button onClick={handleAddMore}>
-            Thêm món (tạo order mới)
+            Order thêm
           </Button>
         )}
         {canPay && (
           <Button onClick={() => router.push(`/payment/${orderId}`)}>
-            Thanh toán
+            Tính tiền
           </Button>
         )}
         {canCancel && (

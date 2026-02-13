@@ -48,11 +48,8 @@ export default function ConfirmOrderPage({
   if (!order) return <div className="text-center py-8 text-gray-500">Order không tồn tại</div>;
 
   const handleGroupedItemClick = (index: number) => {
-    const item = groupedItems[index];
-    if (item.quantity > 1) {
-      setSplitIndex(index);
-      setLayer('split');
-    }
+    setSplitIndex(index);
+    setLayer('split');
   };
 
   const handleSplitDone = (items: { config: OrderItemConfig; quantity: number }[]) => {
@@ -143,7 +140,7 @@ export default function ConfirmOrderPage({
 
       {(layer === 'grouped' || layer === 'regroup') && (
         <div className="flex gap-3 pt-4">
-          <Button variant="secondary" className="flex-1" onClick={() => router.back()}>
+          <Button variant="secondary" className="flex-1" onClick={() => router.push(`/order/${orderId}/edit`)}>
             Quay lại sửa
           </Button>
           <Button

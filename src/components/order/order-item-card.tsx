@@ -24,6 +24,7 @@ export function OrderItemCard({
   onClick,
 }: OrderItemCardProps) {
   const details: string[] = [];
+  if (config.variant) details.push(config.variant);
   if (config.noodleType) details.push(config.noodleType);
   if (config.size && config.size !== 'Tô thường') details.push(config.size);
   if (config.specials?.length) details.push(config.specials.join(', '));

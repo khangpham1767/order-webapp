@@ -42,7 +42,7 @@ export function ConfirmSplit({ groupedItem, menuItem, onDone, onBack }: ConfirmS
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wide">
-          Tách {groupedItem.quantity} tô – Chỉnh riêng từng tô
+          {groupedItem.quantity === 1 ? 'Chỉnh tùy chọn' : `Tách ${groupedItem.quantity} tô – Chỉnh riêng từng tô`}
         </h3>
       </div>
 

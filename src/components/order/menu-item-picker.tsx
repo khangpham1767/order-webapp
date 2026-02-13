@@ -55,7 +55,11 @@ export function MenuItemPicker({
               >
                 <div className="text-center">
                   <h3 className="font-medium text-gray-900 text-sm">{item.name}</h3>
-                  <Badge className="mt-1">{formatVND(item.sellPrice)}</Badge>
+                  {item.options.some((o) => o.optionType === 'VARIANT') ? (
+                    <span className="text-xs text-primary-600 mt-1 inline-block">Chọn loại ›</span>
+                  ) : (
+                    <Badge className="mt-1">{formatVND(item.sellPrice)}</Badge>
+                  )}
                 </div>
               </Card>
             ))}

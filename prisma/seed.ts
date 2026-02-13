@@ -43,11 +43,6 @@ async function main() {
           { optionType: OptionType.SPECIAL, label: 'Không giá', sortOrder: 2 },
           { optionType: OptionType.SPECIAL, label: 'Ít bánh', sortOrder: 3 },
           { optionType: OptionType.SPECIAL, label: 'Không tàu hủ', sortOrder: 4 },
-          // Vegetables
-          { optionType: OptionType.VEGETABLE, label: 'Rau trụng', isDefault: true, sortOrder: 1 },
-          { optionType: OptionType.VEGETABLE, label: 'Rau sống', sortOrder: 2 },
-          { optionType: OptionType.VEGETABLE, label: 'Không rau', sortOrder: 3 },
-          { optionType: OptionType.VEGETABLE, label: 'Chỉ lấy giá', sortOrder: 4 },
           // Size
           { optionType: OptionType.SIZE, label: 'Tô thường', isDefault: true, sortOrder: 1 },
           { optionType: OptionType.SIZE, label: 'Tô em bé', sortOrder: 2, surcharge: -10000 },
@@ -92,9 +87,16 @@ async function main() {
     prisma.menuItem.create({
       data: {
         name: 'Hoành thánh thêm',
-        sellPrice: 15000,
-        costPrice: 7000,
+        sellPrice: 0,
+        costPrice: 0,
         type: MenuItemType.ADDON,
+        options: {
+          create: [
+            { optionType: OptionType.VARIANT, label: '3 viên', isDefault: true, sortOrder: 1, surcharge: 15000 },
+            { optionType: OptionType.VARIANT, label: '4 viên', sortOrder: 2, surcharge: 20000 },
+            { optionType: OptionType.VARIANT, label: '5 viên', sortOrder: 3, surcharge: 25000 },
+          ],
+        },
       },
     }),
     prisma.menuItem.create({
@@ -116,9 +118,18 @@ async function main() {
     prisma.menuItem.create({
       data: {
         name: 'Nước ngọt',
-        sellPrice: 15000,
-        costPrice: 8000,
+        sellPrice: 0,
+        costPrice: 0,
         type: MenuItemType.ADDON,
+        options: {
+          create: [
+            { optionType: OptionType.VARIANT, label: 'Coca', sortOrder: 1, surcharge: 15000 },
+            { optionType: OptionType.VARIANT, label: 'Xá xị', sortOrder: 2, surcharge: 15000 },
+            { optionType: OptionType.VARIANT, label: '7up', sortOrder: 3, surcharge: 15000 },
+            { optionType: OptionType.VARIANT, label: 'Nước suối', sortOrder: 4, surcharge: 10000 },
+            { optionType: OptionType.VARIANT, label: 'Sting', sortOrder: 5, surcharge: 15000 },
+          ],
+        },
       },
     }),
   ]);

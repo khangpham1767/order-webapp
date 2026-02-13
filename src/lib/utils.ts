@@ -21,6 +21,7 @@ function configKey(config: OrderItemConfig): string {
     vegetables: [...(config.vegetables || [])].sort(),
     size: config.size,
     addons: [...(config.addons || [])].sort((a, b) => a.menuItemId - b.menuItemId),
+    variant: config.variant || '',
   });
 }
 

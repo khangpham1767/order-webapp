@@ -24,11 +24,15 @@ interface MenuItemFormProps {
   isEdit?: boolean;
 }
 
-const OPTION_GROUPS: { type: OptionType; label: string }[] = [
+const MAIN_OPTION_GROUPS: { type: OptionType; label: string }[] = [
   { type: 'NOODLE_TYPE', label: 'Loại mì' },
   { type: 'SPECIAL', label: 'Đặc biệt' },
   { type: 'VEGETABLE', label: 'Rau' },
   { type: 'SIZE', label: 'Size' },
+];
+
+const ADDON_OPTION_GROUPS: { type: OptionType; label: string }[] = [
+  { type: 'VARIANT', label: 'Loại' },
 ];
 
 function generateKey() {
@@ -67,7 +71,7 @@ export function MenuItemForm({ initialData, onSubmit, onCancel, isEdit }: MenuIt
     if (!validate()) return;
     setSubmitting(true);
     try {
-      const optionPayload = type === 'MAIN' && options.length > 0
+      const optionPayload = options.length > 0
         ? options.map((opt, i) => ({
             optionType: opt.optionType,
             label: opt.label,
@@ -165,43 +169,45 @@ export function MenuItemForm({ initialData, onSubmit, onCancel, isEdit }: MenuIt
         </div>
       )}
 
-      {type === 'MAIN' && (
+      {(type === 'MAIN' || type === 'ADDON') && (
         <div className="space-y-4">
           <h3 className="text-lg font-semibold text-gray-900">Tùy chọn</h3>
-          {OPTION_GROUPS.map((group) => {
+          {(type === 'MAIN' ? MAIN_OPTION_GROUPS : ADDON_OPTION_GROUPS).map((group) => {
             const groupOptions = options.filter((o) => o.optionType === group.type);
             return (
               <Card key={group.type}>
                 <div className="space-y-3">
                   <h4 className="font-medium text-gray-700">{group.label}</h4>
                   {groupOptions.map((opt) => (
-                    <div key={opt.key} className="flex items-center gap-2">
+                    <div key={opt.key} className="flex flex-col sm:flex-row gap-2">
                       <Input
                         className="flex-1"
                         placeholder="Tên"
                         value={opt.label}
                         onChange={(e) => updateOption(opt.key, 'label', e.target.value)}
                       />
-                      <Input
-                        className="w-28"
-                        type="number"
-                        placeholder="Phụ thu"
-                        value={opt.surcharge || ''}
-                        onChange={(e) => updateOption(opt.key, 'surcharge', Number(e.target.value))}
-                        min={0}
-                      />
-                      <Switch
-                        checked={opt.isDefault}
-                        onChange={(v) => updateOption(opt.key, 'isDefault', v)}
-                        label="Mặc định"
-                      />
-                      <Button
-                        variant="danger"
-                        size="sm"
-                        onClick={() => removeOption(opt.key)}
-                      >
-                        Xóa
-                      </Button>
+                      <div className="flex items-center gap-2">
+                        <Input
+                          className="w-28"
+                          type="number"
+                          placeholder="Phụ thu"
+                          value={opt.surcharge || ''}
+                          onChange={(e) => updateOption(opt.key, 'surcharge', Number(e.target.value))}
+                          min={0}
+                        />
+                        <Switch
+                          checked={opt.isDefault}
+                          onChange={(v) => updateOption(opt.key, 'isDefault', v)}
+                          label="Mặc định"
+                        />
+                        <Button
+                          variant="danger"
+                          size="sm"
+                          onClick={() => removeOption(opt.key)}
+                        >
+                          Xóa
+                        </Button>
+                      </div>
                     </div>
                   ))}
                   <Button

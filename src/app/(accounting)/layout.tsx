@@ -27,6 +27,9 @@ export default function AccountingLayout({ children }: { children: React.ReactNo
           <Link href="/statistics" className="py-3 text-sm font-medium text-gray-600 hover:text-accounting-600 border-b-2 border-transparent hover:border-accounting-500">
             Thống kê
           </Link>
+          <Link href="/table-settings" className="py-3 text-sm font-medium text-gray-600 hover:text-accounting-600 border-b-2 border-transparent hover:border-accounting-500">
+            Bàn
+          </Link>
         </div>
       </nav>
       <main className="max-w-4xl mx-auto p-4">{children}</main>

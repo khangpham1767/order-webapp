@@ -25,6 +25,7 @@ enum OptionType {
   SPECIAL
   VEGETABLE
   SIZE
+  VARIANT
 }
 
 model Table {

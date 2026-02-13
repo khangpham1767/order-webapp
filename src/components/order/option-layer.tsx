@@ -18,6 +18,7 @@ interface OptionLayerProps {
   multiple: boolean;
   required: boolean;
   onSelect: (values: string[]) => void;
+  basePrice?: number;
 }
 
 export function OptionLayer({
@@ -27,6 +28,7 @@ export function OptionLayer({
   multiple,
   required,
   onSelect,
+  basePrice,
 }: OptionLayerProps) {
   const handleChoiceClick = (label: string) => {
     if (multiple) {
@@ -63,7 +65,11 @@ export function OptionLayer({
               onClick={() => handleChoiceClick(choice.label)}
             >
               <div className="text-sm font-medium text-gray-900">{choice.label}</div>
-              {choice.surcharge !== 0 && (
+              {basePrice === 0 && choice.surcharge !== 0 ? (
+                <div className="text-xs mt-0.5 text-gray-600">
+                  {formatVND(choice.surcharge)}
+                </div>
+              ) : choice.surcharge !== 0 && (
                 <div className={cn('text-xs mt-0.5', choice.surcharge > 0 ? 'text-red-500' : 'text-kitchen-600')}>
                   {choice.surcharge > 0 ? '+' : ''}{formatVND(choice.surcharge)}
                 </div>

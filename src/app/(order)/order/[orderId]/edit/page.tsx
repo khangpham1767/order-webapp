@@ -7,6 +7,7 @@ import { useMenu } from '@/hooks/use-menu';
 import { useOrderDraft, type DraftItem } from '@/hooks/use-order-draft';
 import { MenuItemPicker } from '@/components/order/menu-item-picker';
 import { OptionFlow } from '@/components/order/option-flow';
+import { VariantPicker } from '@/components/order/variant-picker';
 import { OrderItemCard } from '@/components/order/order-item-card';
 import { Button } from '@/components/ui/button';
 import { LoadingScreen } from '@/components/ui/spinner';
@@ -26,6 +27,7 @@ export default function EditOrderPage({
   const { mainItems, addonItems, loading: menuLoading } = useMenu();
   const { items, setItems, addItem, removeItem, totalQuantity, clear } = useOrderDraft();
   const [selectedMain, setSelectedMain] = useState<MenuItemWithOptions | null>(null);
+  const [selectedAddonForVariant, setSelectedAddonForVariant] = useState<MenuItemWithOptions | null>(null);
   const [initialized, setInitialized] = useState(false);
 
   useEffect(() => {
@@ -60,10 +62,13 @@ export default function EditOrderPage({
       const sizeOption = menuItem?.options.find(
         (o) => o.optionType === 'SIZE' && o.label === item.config.size,
       );
+      const variantOption = item.config.variant
+        ? menuItem?.options.find((o) => o.optionType === 'VARIANT' && o.label === item.config.variant)
+        : undefined;
       return {
         menuItemId: item.config.menuItemId,
         quantity: item.quantity,
-        unitPrice: (menuItem?.sellPrice || 0) + (sizeOption?.surcharge || 0),
+        unitPrice: (menuItem?.sellPrice || 0) + (sizeOption?.surcharge || 0) + (variantOption?.surcharge || 0),
         configDetail: item.config,
         notes: item.notes,
       };
@@ -87,19 +92,64 @@ export default function EditOrderPage({
     }
   };
 
+  const handleAddonSelect = (item: MenuItemWithOptions) => {
+    const hasVariants = item.options.some((o) => o.optionType === 'VARIANT');
+    if (hasVariants) {
+      setSelectedAddonForVariant(item);
+      return;
+    }
+    const config: OrderItemConfig = {
+      menuItemId: item.id,
+      menuItemName: item.name,
+      noodleType: '',
+      specials: [],
+      vegetables: [],
+      size: '',
+      addons: [],
+      quantity: 1,
+    };
+    addItem(config, 1);
+  };
+
+  const handleVariantSelect = (variant: string) => {
+    if (!selectedAddonForVariant) return;
+    const config: OrderItemConfig = {
+      menuItemId: selectedAddonForVariant.id,
+      menuItemName: selectedAddonForVariant.name,
+      noodleType: '',
+      specials: [],
+      vegetables: [],
+      size: '',
+      addons: [],
+      quantity: 1,
+      variant,
+    };
+    addItem(config, 1);
+    setSelectedAddonForVariant(null);
+  };
+
   if (selectedMain) {
     return (
       <OptionFlow
         menuItem={selectedMain}
-        addonItems={addonItems}
         onComplete={handleOptionComplete}
         onCancel={() => setSelectedMain(null)}
       />
     );
   }
 
+  if (selectedAddonForVariant) {
+    return (
+      <VariantPicker
+        menuItem={selectedAddonForVariant}
+        onSelect={handleVariantSelect}
+        onCancel={() => setSelectedAddonForVariant(null)}
+      />
+    );
+  }
+
   return (
-    <div className="space-y-4 pb-24">
+    <div className="space-y-4 pb-4">
       <h2 className="text-xl font-bold text-gray-900">
         Sửa Order #{orderId} – {order.table.label}
       </h2>
@@ -108,19 +158,7 @@ export default function EditOrderPage({
         mainItems={mainItems}
         addonItems={addonItems}
         onSelectMain={(item) => setSelectedMain(item)}
-        onSelectAddon={(item) => {
-          const config: OrderItemConfig = {
-            menuItemId: item.id,
-            menuItemName: item.name,
-            noodleType: '',
-            specials: [],
-            vegetables: [],
-            size: '',
-            addons: [],
-            quantity: 1,
-          };
-          addItem(config, 1);
-        }}
+        onSelectAddon={handleAddonSelect}
       />
 
       {items.length > 0 && (
@@ -134,7 +172,10 @@ export default function EditOrderPage({
           {items.map((item) => {
             const menuItem = [...mainItems, ...addonItems].find((m) => m.id === item.config.menuItemId);
             const sizeOption = menuItem?.options.find((o) => o.optionType === 'SIZE' && o.label === item.config.size);
-            const unitPrice = (menuItem?.sellPrice || 0) + (sizeOption?.surcharge || 0);
+            const variantOption = item.config.variant
+              ? menuItem?.options.find((o) => o.optionType === 'VARIANT' && o.label === item.config.variant)
+              : undefined;
+            const unitPrice = (menuItem?.sellPrice || 0) + (sizeOption?.surcharge || 0) + (variantOption?.surcharge || 0);
             return (
               <OrderItemCard
                 key={item.id}
@@ -145,12 +186,7 @@ export default function EditOrderPage({
               />
             );
           })}
-        </div>
-      )}
-
-      {items.length > 0 && (
-        <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-4 shadow-lg">
-          <div className="max-w-4xl mx-auto flex gap-3">
+          <div className="flex gap-3 mt-3">
             <Button variant="secondary" className="flex-1" onClick={() => router.back()}>
               Huỷ
             </Button>
@@ -158,6 +194,14 @@ export default function EditOrderPage({
               Lưu thay đổi
             </Button>
           </div>
+        </div>
+      )}
+
+      {items.length === 0 && (
+        <div className="mt-6">
+          <Button variant="secondary" className="w-full" onClick={() => router.back()}>
+            Huỷ
+          </Button>
         </div>
       )}
     </div>
