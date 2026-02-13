@@ -44,20 +44,8 @@ export default function OrderDetailPage({
     }
   };
 
-  const handleAddMore = async () => {
-    try {
-      const res = await fetch('/api/orders', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ tableId: order.tableId, items: [] }),
-      });
-      if (res.ok) {
-        const newOrder = await res.json();
-        router.push(`/order/new?tableId=${order.tableId}&orderId=${newOrder.id}`);
-      }
-    } catch {
-      showToast('Lỗi khi tạo order mới', 'error');
-    }
+  const handleAddMore = () => {
+    router.push(`/order/new?tableId=${order.tableId}&tableLabel=${encodeURIComponent(order.table.label)}`);
   };
 
   return (

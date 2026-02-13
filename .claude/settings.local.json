@@ -7,7 +7,9 @@
       "Bash(done)",
       "Bash(ls:*)",
       "Bash(npx tsc:*)",
-      "Bash(yarn add:*)"
+      "Bash(yarn add:*)",
+      "Bash(find:*)",
+      "Bash(npm run lint)"
     ]
   }
 }

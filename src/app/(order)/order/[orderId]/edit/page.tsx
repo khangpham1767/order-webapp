@@ -82,7 +82,7 @@ export default function EditOrderPage({
       });
       if (res.ok) {
         showToast('Đã cập nhật order', 'success');
-        router.push(`/order/${orderId}`);
+        router.push(`/order/${orderId}/confirm`);
       } else {
         const data = await res.json();
         showToast(data.error || 'Lỗi cập nhật', 'error');

@@ -17,7 +17,7 @@ function NewOrderContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const tableId = searchParams.get('tableId');
-  const orderId = searchParams.get('orderId');
+  const tableLabel = searchParams.get('tableLabel');
 
   const { mainItems, addonItems, loading: menuLoading } = useMenu();
   const { items, totalQuantity, addItem, removeItem, clear } = useOrderDraft();
@@ -76,7 +76,7 @@ function NewOrderContent() {
   };
 
   const handleSubmit = async () => {
-    if (!orderId || items.length === 0) return;
+    if (!tableId || items.length === 0) return;
 
     const orderItems = items.map((item) => {
       const menuItem = [...mainItems, ...addonItems].find(
@@ -102,14 +102,17 @@ function NewOrderContent() {
     });
 
     try {
-      await fetch(`/api/orders/${orderId}/items`, {
-        method: 'PUT',
+      const res = await fetch('/api/orders', {
+        method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ items: orderItems }),
+        body: JSON.stringify({ tableId: parseInt(tableId), items: orderItems }),
       });
-      router.push(`/order/${orderId}/confirm`);
+      if (res.ok) {
+        const order = await res.json();
+        router.push(`/order/${order.id}/confirm`);
+      }
     } catch (error) {
-      console.error('Failed to save order items:', error);
+      console.error('Failed to create order:', error);
     }
   };
 
@@ -136,7 +139,7 @@ function NewOrderContent() {
   return (
     <div className="space-y-4 pb-4">
       <h2 className="text-xl font-bold text-gray-900">
-        Order mới {tableId && `– Bàn ${tableId}`}
+        Order mới {tableLabel && `– ${tableLabel}`}
       </h2>
 
       <MenuItemPicker

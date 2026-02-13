@@ -21,44 +21,11 @@ const statusColor: Record<string, string> = {
 export function TableGrid({ tables }: TableGridProps) {
   const router = useRouter();
 
-  const createNewOrder = async (tableId: number) => {
-    const res = await fetch('/api/orders', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ tableId, items: [] }),
-    });
-    if (res.ok) {
-      const order = await res.json();
-      router.push(`/order/new?tableId=${tableId}&orderId=${order.id}`);
-    }
-  };
-
-  const handleTableClick = async (table: TableWithStatus) => {
+  const handleTableClick = (table: TableWithStatus) => {
     if (table.activeOrderId) {
-      // If DRAFT, check if it has items — clean up abandoned empty drafts
-      if (table.activeOrderStatus === 'DRAFT') {
-        try {
-          const res = await fetch(`/api/orders/${table.activeOrderId}`);
-          if (res.ok) {
-            const order = await res.json();
-            if (order.items.length === 0) {
-              // Empty draft — delete it and create fresh
-              await fetch(`/api/orders/${table.activeOrderId}`, { method: 'DELETE' });
-              await createNewOrder(table.id);
-              return;
-            }
-          }
-        } catch {
-          // Fall through to default behavior
-        }
-      }
       router.push(`/order/${table.activeOrderId}`);
     } else {
-      try {
-        await createNewOrder(table.id);
-      } catch (error) {
-        console.error('Failed to create order:', error);
-      }
+      router.push(`/order/new?tableId=${table.id}&tableLabel=${encodeURIComponent(table.label)}`);
     }
   };
 
