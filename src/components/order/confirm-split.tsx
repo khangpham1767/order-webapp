@@ -70,6 +70,18 @@ export function ConfirmSplit({ groupedItem, menuItem, onDone, onBack }: ConfirmS
 
             {isEditing && menuItem && (
               <div className="mt-4 space-y-4 border-t pt-4">
+                {menuItem.options.filter((o) => o.optionType === 'NOODLE_TYPE').length > 0 && (
+                  <OptionLayer
+                    title="Loại bánh/sợi"
+                    choices={menuItem.options
+                      .filter((o) => o.optionType === 'NOODLE_TYPE')
+                      .map((o) => ({ id: o.id, label: o.label, isDefault: o.isDefault, surcharge: o.surcharge }))}
+                    selectedValues={[item.config.noodleType]}
+                    multiple={false}
+                    required={true}
+                    onSelect={(v) => handleUpdateItem(index, 'noodleType', v[0] || '')}
+                  />
+                )}
                 {menuItem.options.filter((o) => o.optionType === 'SPECIAL').length > 0 && (
                   <OptionLayer
                     title="Yêu cầu đặc biệt"
@@ -92,6 +104,18 @@ export function ConfirmSplit({ groupedItem, menuItem, onDone, onBack }: ConfirmS
                     multiple={false}
                     required={false}
                     onSelect={(v) => handleUpdateItem(index, 'vegetables', v)}
+                  />
+                )}
+                {menuItem.options.filter((o) => o.optionType === 'SIZE').length > 0 && (
+                  <OptionLayer
+                    title="Size"
+                    choices={menuItem.options
+                      .filter((o) => o.optionType === 'SIZE')
+                      .map((o) => ({ id: o.id, label: o.label, isDefault: o.isDefault, surcharge: o.surcharge }))}
+                    selectedValues={[item.config.size]}
+                    multiple={false}
+                    required={true}
+                    onSelect={(v) => handleUpdateItem(index, 'size', v[0] || '')}
                   />
                 )}
               </div>

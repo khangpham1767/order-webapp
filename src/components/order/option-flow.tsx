@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { QuantityStepper } from '@/components/ui/quantity-stepper';
 import { OptionLayer } from './option-layer';
@@ -14,15 +15,14 @@ interface OptionFlowProps {
   onCancel: () => void;
 }
 
-type Step = 'NOODLE_TYPE' | 'SPECIAL' | 'VEGETABLE' | 'SIZE' | 'QUANTITY';
+type Step = 'NOODLE_TYPE' | 'SPECIAL' | 'VEGETABLE' | 'SIZE';
 
-const STEP_ORDER: Step[] = ['NOODLE_TYPE', 'SPECIAL', 'VEGETABLE', 'SIZE', 'QUANTITY'];
+const STEP_ORDER: Step[] = ['NOODLE_TYPE', 'SPECIAL', 'VEGETABLE', 'SIZE'];
 const STEP_LABELS: Record<Step, string> = {
   NOODLE_TYPE: 'Loại bánh/sợi',
   SPECIAL: 'Yêu cầu đặc biệt',
   VEGETABLE: 'Rau',
   SIZE: 'Size',
-  QUANTITY: 'Số lượng',
 };
 
 export function OptionFlow({ menuItem, onComplete, onCancel }: OptionFlowProps) {
@@ -42,10 +42,10 @@ export function OptionFlow({ menuItem, onComplete, onCancel }: OptionFlowProps) 
     if (step === 'SPECIAL') return specialOptions.length > 0;
     if (step === 'VEGETABLE') return vegetableOptions.length > 0;
     if (step === 'SIZE') return sizeOptions.length > 0;
-    return true; // QUANTITY always shown
+    return true;
   });
 
-  const [stepIndex, setStepIndex] = useState(0);
+  const [expandedSection, setExpandedSection] = useState<Step | null>(null);
   const [noodleType, setNoodleType] = useState<string>(
     noodleOptions.find((o) => o.isDefault)?.label || noodleOptions[0]?.label || '',
   );
@@ -58,65 +58,41 @@ export function OptionFlow({ menuItem, onComplete, onCancel }: OptionFlowProps) 
   );
   const [quantity, setQuantity] = useState(1);
 
-  const currentStep = availableSteps[stepIndex];
-  const isLastStep = stepIndex === availableSteps.length - 1;
-  const isFirstStep = stepIndex === 0;
-
-  const canProceed = () => {
-    if (currentStep === 'NOODLE_TYPE') return noodleType !== '';
-    if (currentStep === 'SIZE') return size !== '';
-    return true;
+  const toggleSection = (step: Step) => {
+    setExpandedSection((prev) => (prev === step ? null : step));
   };
 
-  const handleNext = () => {
-    if (isLastStep) {
-      const sizeSurcharge = sizeOptions.find((o) => o.label === size)?.surcharge || 0;
-      const config: OrderItemConfig = {
-        menuItemId: menuItem.id,
-        menuItemName: menuItem.name,
-        noodleType,
-        specials,
-        vegetables,
-        size,
-        addons: [],
-        quantity,
-      };
-      const unitPrice = menuItem.sellPrice + sizeSurcharge;
-      onComplete({ ...config, quantity: 1 }, quantity);
-      return;
-    }
-    setStepIndex((i) => i + 1);
-  };
-
-  const handleBack = () => {
-    if (isFirstStep) {
-      onCancel();
-    } else {
-      setStepIndex((i) => i - 1);
+  const getSectionDisplayValue = (step: Step): string => {
+    switch (step) {
+      case 'NOODLE_TYPE':
+        return noodleType || 'Chưa chọn';
+      case 'SPECIAL':
+        return specials.length > 0 ? specials.join(', ') : 'Chưa chọn';
+      case 'VEGETABLE':
+        return vegetables.length > 0 ? vegetables.join(', ') : 'Chưa chọn';
+      case 'SIZE':
+        return size || 'Chưa chọn';
     }
   };
 
-  return (
-    <div className="flex flex-col min-h-[calc(100vh-theme(spacing.32))]">
-      <div className="space-y-6 flex-1">
-        {/* Progress */}
-        <div className="flex items-center gap-1">
-          {availableSteps.map((step, i) => (
-            <div
-              key={step}
-              className={`h-1 flex-1 rounded-full ${
-                i <= stepIndex ? 'bg-primary-500' : 'bg-gray-200'
-              }`}
-            />
-          ))}
-        </div>
+  const handleSubmit = () => {
+    const config: OrderItemConfig = {
+      menuItemId: menuItem.id,
+      menuItemName: menuItem.name,
+      noodleType,
+      specials,
+      vegetables,
+      size,
+      addons: [],
+      quantity,
+    };
+    onComplete({ ...config, quantity: 1 }, quantity);
+  };
 
-        <h2 className="text-lg font-semibold text-gray-900">
-          {menuItem.name} — {STEP_LABELS[currentStep]}
-        </h2>
-
-        {/* Step content */}
-        {currentStep === 'NOODLE_TYPE' && (
+  const renderSectionContent = (step: Step) => {
+    switch (step) {
+      case 'NOODLE_TYPE':
+        return (
           <OptionLayer
             title="Chọn loại bánh/sợi"
             choices={noodleOptions}
@@ -125,9 +101,9 @@ export function OptionFlow({ menuItem, onComplete, onCancel }: OptionFlowProps) 
             required={true}
             onSelect={(v) => setNoodleType(v[0] || '')}
           />
-        )}
-
-        {currentStep === 'SPECIAL' && (
+        );
+      case 'SPECIAL':
+        return (
           <OptionLayer
             title="Yêu cầu đặc biệt"
             choices={specialOptions}
@@ -136,9 +112,9 @@ export function OptionFlow({ menuItem, onComplete, onCancel }: OptionFlowProps) 
             required={false}
             onSelect={setSpecials}
           />
-        )}
-
-        {currentStep === 'VEGETABLE' && (
+        );
+      case 'VEGETABLE':
+        return (
           <OptionLayer
             title="Chọn rau"
             choices={vegetableOptions}
@@ -147,9 +123,9 @@ export function OptionFlow({ menuItem, onComplete, onCancel }: OptionFlowProps) 
             required={false}
             onSelect={setVegetables}
           />
-        )}
-
-        {currentStep === 'SIZE' && (
+        );
+      case 'SIZE':
+        return (
           <OptionLayer
             title="Chọn size"
             choices={sizeOptions}
@@ -158,27 +134,78 @@ export function OptionFlow({ menuItem, onComplete, onCancel }: OptionFlowProps) 
             required={true}
             onSelect={(v) => setSize(v[0] || '')}
           />
-        )}
+        );
+    }
+  };
 
-        {currentStep === 'QUANTITY' && (
-          <div className="flex flex-col items-center gap-4 py-8">
-            <p className="text-gray-600">Số lượng</p>
-            <QuantityStepper value={quantity} onChange={setQuantity} min={1} max={20} />
-          </div>
-        )}
+  return (
+    <div className="flex flex-col min-h-[calc(100vh-theme(spacing.32))]">
+      <div className="flex-1 space-y-3">
+        <h2 className="text-lg font-semibold text-gray-900">{menuItem.name}</h2>
+
+        {/* Accordion sections */}
+        {availableSteps.map((step) => {
+          const isExpanded = expandedSection === step;
+          const displayValue = getSectionDisplayValue(step);
+          const hasValue = displayValue !== 'Chưa chọn';
+
+          return (
+            <div key={step} className="border border-gray-200 rounded-lg overflow-hidden">
+              <button
+                type="button"
+                className="flex items-center justify-between w-full px-4 py-3 text-left bg-white hover:bg-gray-50 transition-colors"
+                onClick={() => toggleSection(step)}
+              >
+                <span className="text-sm font-medium text-gray-700">
+                  {STEP_LABELS[step]}
+                </span>
+                <span className="flex items-center gap-2">
+                  <span
+                    className={cn(
+                      'text-sm',
+                      hasValue ? 'text-gray-900' : 'text-gray-400',
+                    )}
+                  >
+                    {displayValue}
+                  </span>
+                  <svg
+                    className={cn(
+                      'w-4 h-4 text-gray-400 transition-transform',
+                      isExpanded && 'rotate-180',
+                    )}
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    strokeWidth={2}
+                    stroke="currentColor"
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+                  </svg>
+                </span>
+              </button>
+
+              {isExpanded && (
+                <div className="px-4 pb-4 border-t border-gray-100">
+                  <div className="pt-3">{renderSectionContent(step)}</div>
+                </div>
+              )}
+            </div>
+          );
+        })}
+
+        {/* Quantity - always visible, not collapsible */}
+        <div className="border border-gray-200 rounded-lg px-4 py-3 flex items-center justify-between">
+          <span className="text-sm font-medium text-gray-700">Số lượng</span>
+          <QuantityStepper value={quantity} onChange={setQuantity} min={1} max={20} />
+        </div>
       </div>
 
-      {/* Navigation - pushed to bottom */}
+      {/* Bottom buttons */}
       <div className="flex gap-3 mt-auto pt-6">
-        <Button variant="secondary" className="flex-1" onClick={handleBack}>
-          {isFirstStep ? 'Huỷ' : 'Quay lại'}
+        <Button variant="secondary" className="flex-1" onClick={onCancel}>
+          Quay lại
         </Button>
-        <Button
-          className="flex-1"
-          onClick={handleNext}
-          disabled={!canProceed()}
-        >
-          {isLastStep ? 'Thêm vào đơn' : 'Tiếp tục'}
+        <Button className="flex-1" onClick={handleSubmit}>
+          Thêm vào đơn
         </Button>
       </div>
     </div>
