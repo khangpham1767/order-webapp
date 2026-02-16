@@ -27,4 +27,4 @@ COPY --from=builder /app/prisma ./prisma
 EXPOSE 8000
 ENV PORT=8000
 
-CMD ["node", "--import", "tsx", "server/index.ts"]
+CMD ["sh", "-c", "pnpm prisma migrate deploy && node --import tsx server/index.ts"]
