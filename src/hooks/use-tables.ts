@@ -34,10 +34,14 @@ export function useTables() {
     };
 
     socket.on(SOCKET_EVENTS.TABLE_STATUS_CHANGED, handleTableChange);
+    socket.on(SOCKET_EVENTS.ORDER_SUBMITTED, handleTableChange);
+    socket.on(SOCKET_EVENTS.ORDER_STATUS_CHANGED, handleTableChange);
     socket.on(SOCKET_EVENTS.PAYMENT_COMPLETED, handleTableChange);
 
     return () => {
       socket.off(SOCKET_EVENTS.TABLE_STATUS_CHANGED, handleTableChange);
+      socket.off(SOCKET_EVENTS.ORDER_SUBMITTED, handleTableChange);
+      socket.off(SOCKET_EVENTS.ORDER_STATUS_CHANGED, handleTableChange);
       socket.off(SOCKET_EVENTS.PAYMENT_COMPLETED, handleTableChange);
     };
   }, [socket, fetchTables]);
