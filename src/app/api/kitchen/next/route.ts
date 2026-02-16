@@ -13,7 +13,7 @@ export async function POST() {
       emitKitchenOrderStarted(order);
       const state = await getKitchenQueueState();
       emitKitchenQueueUpdated(state);
-    } catch { /* socket not available */ }
+    } catch (e) { console.error('[Socket] kitchen/next emit failed:', e); }
 
     return NextResponse.json(order);
   } catch (error) {

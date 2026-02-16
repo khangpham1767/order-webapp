@@ -9,8 +9,11 @@ export default function KitchenLayout({ children }: { children: React.ReactNode 
 
   useEffect(() => {
     if (!socket) return;
-    socket.emit('join_room', 'room:kitchen');
+    const joinRoom = () => socket.emit('join_room', 'room:kitchen');
+    if (socket.connected) joinRoom();
+    socket.on('connect', joinRoom);
     return () => {
+      socket.off('connect', joinRoom);
       socket.emit('leave_room', 'room:kitchen');
     };
   }, [socket]);

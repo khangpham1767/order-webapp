@@ -12,7 +12,7 @@ export async function POST(
     const frontInsert = body.frontInsert === true;
     const order = await submitOrder(parseInt(orderId), frontInsert);
 
-    try { emitOrderSubmitted(order); } catch { /* socket not available */ }
+    try { emitOrderSubmitted(order); } catch (e) { console.error('[Socket] emitOrderSubmitted failed:', e); }
 
     return NextResponse.json(order);
   } catch (error) {

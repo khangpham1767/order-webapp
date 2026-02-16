@@ -19,7 +19,7 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const order = await createOrder(body);
 
-    try { emitOrderCreated(order); } catch { /* socket not available */ }
+    try { emitOrderCreated(order); } catch (e) { console.error('[Socket] emitOrderCreated failed:', e); }
 
     return NextResponse.json(order, { status: 201 });
   } catch (error) {

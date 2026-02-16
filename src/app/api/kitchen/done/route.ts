@@ -17,7 +17,7 @@ export async function POST() {
       }
       const state = await getKitchenQueueState();
       emitKitchenQueueUpdated(state);
-    } catch { /* socket not available */ }
+    } catch (e) { console.error('[Socket] kitchen/done emit failed:', e); }
 
     return NextResponse.json({ completedOrder, nextOrder });
   } catch (error) {

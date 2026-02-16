@@ -10,7 +10,6 @@ export function getSocket(): TypedSocket {
   if (!socket) {
     socket = io({
       autoConnect: false,
-      transports: ['websocket'],
     }) as TypedSocket;
   }
   return socket;

@@ -12,8 +12,11 @@ export default function OrderLayout({ children }: { children: React.ReactNode })
 
   useEffect(() => {
     if (!socket) return;
-    socket.emit('join_room', 'room:order_staff');
+    const joinRoom = () => socket.emit('join_room', 'room:order_staff');
+    if (socket.connected) joinRoom();
+    socket.on('connect', joinRoom);
     return () => {
+      socket.off('connect', joinRoom);
       socket.emit('leave_room', 'room:order_staff');
     };
   }, [socket]);

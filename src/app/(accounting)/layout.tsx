@@ -10,8 +10,11 @@ export default function AccountingLayout({ children }: { children: React.ReactNo
 
   useEffect(() => {
     if (!socket) return;
-    socket.emit('join_room', 'room:accounting');
+    const joinRoom = () => socket.emit('join_room', 'room:accounting');
+    if (socket.connected) joinRoom();
+    socket.on('connect', joinRoom);
     return () => {
+      socket.off('connect', joinRoom);
       socket.emit('leave_room', 'room:accounting');
     };
   }, [socket]);

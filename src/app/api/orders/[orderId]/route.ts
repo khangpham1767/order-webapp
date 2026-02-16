@@ -27,7 +27,7 @@ export async function DELETE(
     const { orderId } = await params;
     const result = await cancelOrder(parseInt(orderId));
 
-    try { emitOrderCancelled(result); } catch { /* socket not available */ }
+    try { emitOrderCancelled(result); } catch (e) { console.error('[Socket] emitOrderCancelled failed:', e); }
 
     return NextResponse.json(result);
   } catch (error) {

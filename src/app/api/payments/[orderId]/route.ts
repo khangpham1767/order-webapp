@@ -17,7 +17,7 @@ export async function POST(
 
     const payment = await processPayment(id);
 
-    try { emitPaymentCompleted(payment, order.tableId); } catch { /* socket not available */ }
+    try { emitPaymentCompleted(payment, order.tableId); } catch (e) { console.error('[Socket] emitPaymentCompleted failed:', e); }
 
     return NextResponse.json(payment, { status: 201 });
   } catch (error) {

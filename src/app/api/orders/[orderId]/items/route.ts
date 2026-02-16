@@ -11,7 +11,7 @@ export async function PUT(
     const body = await request.json();
     const order = await updateOrderItems(parseInt(orderId), body);
 
-    try { emitOrderUpdated(order); } catch { /* socket not available */ }
+    try { emitOrderUpdated(order); } catch (e) { console.error('[Socket] emitOrderUpdated failed:', e); }
 
     return NextResponse.json(order);
   } catch (error) {
