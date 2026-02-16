@@ -22,8 +22,5 @@ export const ORDER_STATUS_LABELS: Record<string, string> = {
   PAID: 'Đã thanh toán',
 };
 
-export const SOCKET_URL =
-  process.env.NEXT_PUBLIC_SOCKET_URL || 'http://localhost:8000';
-
 export const QUEUE_POSITION_START = 1000;
 export const QUEUE_POSITION_GAP = 1;
