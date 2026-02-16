@@ -17,8 +17,16 @@ export function CurrentOrder({ order }: CurrentOrderProps) {
 
       <div className="space-y-3">
         {order.items.map((item) => {
+          // For "Hủ tiếu" items: merge noodle type into title (e.g. "Hủ tiếu mì chay")
+          let displayName = item.menuItemName;
+          const noodle = item.configDetail.noodleType;
+          const isHuTieu = item.menuItemName.startsWith('Hủ tiếu');
+          if (isHuTieu && noodle) {
+            displayName = item.menuItemName.replace('Hủ tiếu', noodle);
+          }
+
           const details: string[] = [];
-          if (item.configDetail.noodleType) details.push(item.configDetail.noodleType);
+          if (!isHuTieu && noodle) details.push(noodle);
           if (item.configDetail.size && item.configDetail.size !== 'Tô thường') {
             details.push(item.configDetail.size);
           }
@@ -36,7 +44,7 @@ export function CurrentOrder({ order }: CurrentOrderProps) {
             <Card key={item.id} className="border-l-4 border-l-kitchen-500">
               <div className="flex items-start justify-between">
                 <div>
-                  <h3 className="text-xl font-bold text-gray-900">{item.menuItemName}</h3>
+                  <h3 className="text-xl font-bold text-gray-900">{displayName}</h3>
                   {details.length > 0 && (
                     <p className="text-base text-gray-600 mt-1">{details.join(' – ')}</p>
                   )}
